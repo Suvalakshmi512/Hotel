@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import ezee.hotel.management.crud.dto.CustomerFeedBackDto;
+import ezee.hotel.management.crud.exception.ResponceException;
 import ezee.hotel.management.crud.repository.CustomerFeedbackRepo;
 
 @Service
@@ -21,8 +22,10 @@ public class CustomerFeedBackService {
 	{
 		return customerFeedRepo.findAll();
 	}
-	public CustomerFeedBackDto getById(int id){
-		return customerFeedRepo.findById(id);
+	public ResponceException<CustomerFeedBackDto> getById(int id){
+		 CustomerFeedBackDto byId = customerFeedRepo.findById(id);
+		return ResponceException.success(byId);
+		 
 	}
 	public void Update(int id,CustomerFeedBackDto custeomerFeedback) {
 		customerFeedRepo.updateFeedback(id, custeomerFeedback);

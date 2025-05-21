@@ -9,14 +9,31 @@ import org.springframework.stereotype.Repository;
 import ezee.hotel.management.crud.dto.CustomerDto;
 import ezee.hotel.management.crud.dto.CustomerFeedBackDto;
 import ezee.hotel.management.crud.dto.OrderDto;
+import ezee.hotel.management.crud.exception.ErrorCode;
+import ezee.hotel.management.crud.exception.ServiceException;
 
 @Repository
 public class CustomerFeedbackRepo {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
+    
+    public boolean existsById(int id) {
+	    String sql = "SELECT COUNT(*) FROM customer_feedback WHERE feedback_id = ?";
+	    Integer count = jdbcTemplate.queryForObject(sql, Integer.class, id);
+	    return count != null && count > 0;
+	}
 
     public int insertCustomerFeedback(CustomerFeedBackDto customerFeedback) {
+    	
+    	 if (customerFeedback == null || customerFeedback.getCustomerDto() == null) {
+    	        throw new ServiceException(ErrorCode.INVALID_INPUT);
+    	    }
+
+    	    if (existsById(customerFeedback.getFeedbackId())) {
+    	        throw new ServiceException(ErrorCode.ID_ALREADY_EXISTS);
+    	    }
+
         String sql = "INSERT INTO customer_feedback(feedback_id, customer_id,rating, feedback_comment, feedback_date) " +
                      "VALUES (?, ?, ?, ?, ?)";
         return jdbcTemplate.update(
@@ -55,21 +72,43 @@ public class CustomerFeedbackRepo {
 
     public CustomerFeedBackDto findById(int feedbackId) {
         String sql = "SELECT  cf.feedback_id, cf.customer_id, cf.rating, cf.feedback_comment, cf.feedback_date,c.customer_name, c.customer_phone, c.customer_email, c.customer_registered_on FROM customer_feedback cf JOIN customer c ON cf.customer_id = c.customer_id where feedback_id = ?";
+        try {
         return jdbcTemplate.queryForObject(sql, rowMapper, feedbackId);
-    }
+        }catch (Exception e) {
+			throw new ServiceException(ErrorCode.ID_NOT_FOUND_EXCEPTION);
+		}
+        }
 
     public int updateFeedback(int id,CustomerFeedBackDto feedback) {
+    	if (feedback == null) {
+            throw new ServiceException(ErrorCode.INVALID_INPUT);
+        }
+
+        if (id != feedback.getFeedbackId()) {
+            throw new ServiceException(ErrorCode.ID_MISMATCH);
+        }
         String sql = "UPDATE customer_feedback SET rating = ?, feedback_comment = ?, feedback_date = ? WHERE feedback_id = ?";
-        return jdbcTemplate.update(sql, 
+        
+         int update = jdbcTemplate.update(sql, 
             feedback.getRating(),
             feedback.getFeedbackComment(),
             feedback.getFeedbackDate(),
             feedback.getFeedbackId()
         );
+         if(update==0) {
+        	 throw new ServiceException(ErrorCode.ID_NOT_FOUND_EXCEPTION); 
+         }
+		return update;
+        
+       
     }
 
     public int deleteFeedbackById(int feedbackId) {
         String sql = "DELETE FROM customer_feedback WHERE feedback_id = ?";
-        return jdbcTemplate.update(sql, feedbackId);
+         int update = jdbcTemplate.update(sql, feedbackId);
+         if (update == 0) {
+ 	        throw new ServiceException(ErrorCode.ID_NOT_FOUND_EXCEPTION);
+ 	    }
+ 	    return update;
     }
 }

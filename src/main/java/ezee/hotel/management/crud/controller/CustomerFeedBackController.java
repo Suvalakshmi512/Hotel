@@ -17,6 +17,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import ezee.hotel.management.crud.dto.CustomerDto;
 import ezee.hotel.management.crud.dto.CustomerFeedBackDto;
+import ezee.hotel.management.crud.exception.ResponceException;
+import ezee.hotel.management.crud.exception.ServiceException;
 import ezee.hotel.management.crud.service.CustomerFeedBackService;
 
 @RestController
@@ -28,11 +30,11 @@ public class CustomerFeedBackController {
 	public ResponseEntity<?> CreateCustomerFB(@RequestBody CustomerFeedBackDto customerFB) {
 		try {
 		customerFeedService.saveCustomerFB(customerFB);
-		return ResponseEntity.ok("Inserted Success Fully");
-		}catch (DataAccessException dae) {
+		return ResponseEntity.ok(ResponceException.success("Inserted Success Fully"));
+		}catch (ServiceException se) {
 	        return ResponseEntity
-	                .status(HttpStatus.INTERNAL_SERVER_ERROR)
-	                .body("Database exception while inserting cutomerFeedback: " + dae.getMessage());
+	                .status(HttpStatus.OK)
+	                .body(ResponceException.error(se.getErrorCode()));
 	    }
 	}
 	
@@ -43,7 +45,7 @@ public class CustomerFeedBackController {
 		return ResponseEntity.ok(customerFeedBackDtos);
 		}catch (DataAccessException dae) {
 	        return ResponseEntity
-	                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+	                .status(HttpStatus.OK)
 	                .body("Database exception while retrieving cutomerFeedback: " + dae.getMessage());
 	    }
 	}
@@ -52,21 +54,21 @@ public class CustomerFeedBackController {
 	public ResponseEntity<?> fetchById(@PathVariable int id) {
 		try {
 		return ResponseEntity.ok(customerFeedService.getById(id));
-		}catch (DataAccessException dae) {
+		}catch (ServiceException se) {
 	        return ResponseEntity
-	                .status(HttpStatus.INTERNAL_SERVER_ERROR)
-	                .body("Database exception while retrieving cutomerFeedback: " + dae.getMessage());
+	                .status(HttpStatus.OK)
+	                .body(ResponceException.error(se.getErrorCode()));
 	    }
 	}
 	@PostMapping("/updatecustomerfeedback/{id}")
 	public ResponseEntity<?> updateCustomer(@PathVariable int id, @RequestBody CustomerFeedBackDto customerFeedback) {
 		try {
 		customerFeedService.Update(id, customerFeedback);
-		return ResponseEntity.ok("Update successfull");
-		}catch (DataAccessException dae) {
+		return ResponseEntity.ok(ResponceException.success("Update successfull"));
+		}catch (ServiceException se) {
 	        return ResponseEntity
-	                .status(HttpStatus.INTERNAL_SERVER_ERROR)
-	                .body("Database exception while Updating cutomerFeedback: " + dae.getMessage());
+	                .status(HttpStatus.OK)
+	                .body(ResponceException.error(se.getErrorCode()));
 	    }
 	}
 	
@@ -74,11 +76,11 @@ public class CustomerFeedBackController {
 	public ResponseEntity<?> CustomerfeedbackDelete(@PathVariable int id) {
 		try {
 		customerFeedService.DeleteCustomerFeedback(id);
-		return ResponseEntity.ok("deleted successfully");
-		}catch (DataAccessException dae) {
+		return ResponseEntity.ok(ResponceException.success("Deleted successfully"));
+		}catch (ServiceException se) {
 	        return ResponseEntity
-	                .status(HttpStatus.INTERNAL_SERVER_ERROR)
-	                .body("Database exception while Deleting cutomerFeedback: " + dae.getMessage());
+	                .status(HttpStatus.OK)
+	                .body(ResponceException.error(se.getErrorCode()));
 	    }
 	}
 	

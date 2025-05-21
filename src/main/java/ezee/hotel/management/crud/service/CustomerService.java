@@ -6,6 +6,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import ezee.hotel.management.crud.dto.CustomerDto;
+import ezee.hotel.management.crud.exception.ErrorCode;
+import ezee.hotel.management.crud.exception.ResponceException;
+import ezee.hotel.management.crud.exception.ServiceException;
 import ezee.hotel.management.crud.repository.CustomerRepository;
 
 @Service
@@ -19,9 +22,10 @@ public class CustomerService {
 	public List<CustomerDto> getAllCustomers() {
 		return customerRepository.findAll();
 	}
-	public CustomerDto getById(int id){
-		return customerRepository.findById(id);
+	public ResponceException<CustomerDto> getById(int id){
+		 CustomerDto byId = customerRepository.findById(id);
 		
+	   return ResponceException.success(byId);
 	}
 	public void updateCustomer(CustomerDto cutomer) {
 		customerRepository.updateCustomer(cutomer);
@@ -30,6 +34,4 @@ public class CustomerService {
 	public void deleteCustomer(int id) {
         customerRepository.deleteById(id);
     }
-	
-
 }
